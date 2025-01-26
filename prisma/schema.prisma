@@ -7,12 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model auth {
+model companies {
+  id           Int       @id @default(autoincrement())
+  name         String?   @db.VarChar(255)
+  trading_name String?   @db.VarChar(100)
+  cnpj         String    @unique(map: "cnpj") @db.VarChar(18)
+  active       Boolean?  @default(false)
+  created_at   DateTime? @default(now()) @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+  deleted_at   DateTime? @db.Timestamp(0)
+  users        users[]
+}
+
+model users {
   id                   Int       @id @default(autoincrement())
+  name                 String    @db.VarChar(100)
   email                String    @db.VarChar(100)
   pass                 String    @db.VarChar(255)
   active               Boolean?  @default(false)
-  user_id              Int
+  company_id           Int
   failed_attempts      Int?      @default(0)
   password_reset_token String?   @db.VarChar(255)
   role                 String?   @default("user") @db.VarChar(20)
@@ -21,23 +34,7 @@ model auth {
   deleted_at           DateTime? @db.Timestamp(0)
   created_at           DateTime? @default(now()) @db.Timestamp(0)
   updated_at           DateTime? @db.Timestamp(0)
-  users                users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_user")
+  companies            companies @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_company")
 
-  @@index([user_id], map: "fk_user")
-}
-
-model companies {
-  id           Int       @id @default(autoincrement())
-  name         String?   @db.VarChar(255)
-  trading_name String?   @db.VarChar(100)
-  active       Boolean?  @default(false)
-  created_at   DateTime? @default(now()) @db.Timestamp(0)
-  updated_at   DateTime? @db.Timestamp(0)
-  deleted_at   DateTime? @db.Timestamp(0)
-}
-
-model users {
-  id   Int     @id @default(autoincrement())
-  name String? @db.VarChar(100)
-  auth auth[]
+  @@index([company_id], map: "fk_company")
 }
