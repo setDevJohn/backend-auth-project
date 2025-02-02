@@ -8,8 +8,14 @@ export interface ICreateUserResquest {
 }
 
 export interface ICreateUser {
-  name: string,
-  email: string,
-  pass: string,
-  company_id: number
+  company: {
+    companyName: string
+    tradingName: string
+    cnpj: string
+  };
+  user: {
+    name: string
+    email: string
+    pass: string
+  }
 }
