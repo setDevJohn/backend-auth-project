@@ -8,22 +8,12 @@ export class CompanyModel {
     this.prisma = new PrismaClient();
   }
 
-  async create(companyInfo: ICreateCompany) {
-    try {
-      const { companyName, tradingName, cnpj } = companyInfo
-
-      const company = await this.prisma.companies.create({
-        data: {
-          name: companyName,
-          trading_name: tradingName,
-          cnpj,
-        },
-      })
-
-      return company
-    } catch (err) {
-      console.error('Error creating company:', err)
-      throw err;
-    }
+  async findAll({cnpj, name}: {cnpj?: string, name?: string}) {
+    return await this.prisma.companies.findMany({
+      where: {
+        ...(cnpj && { cnpj }),
+        ...(name && { name })
+      }
+    })
   }
 }
