@@ -1,49 +1,42 @@
-import { ICreateUserResquest } from '../interfaces/user';
-import { CompanyModel } from '../models/company';
+import { Request, Response } from 'express';
 import { UserModel } from '../models/user';
+import { ResponseHandler } from '../helpers/responseHandler';
+import { errorHandler } from '../error/errorHandler';
+import { AppError, HttpStatus } from '../error/appError';
+import bcrypt from "bcrypt";
 
 export class UserController {
   private userModel: UserModel
-  private companyModel: CompanyModel
+  public responseHandler: ResponseHandler
 
   constructor() {
+    this.responseHandler = new ResponseHandler();
     this.userModel = new UserModel();
-    this.companyModel = new CompanyModel();
   }
 
   async create (req: Request, res: Response) {
-    const { 
-      name,
-      email,
-      pass,
-      companyName,
-      tradingName,
-      cnpj
-    } = req.body as ICreateUserResquest;
-  
     try {
-      
-    
-      const company = await this.companyModel.create({
-        companyName,
-        tradingName,
-        cnpj
-      })
-      console.log('company', company);
+      const data = req.body;
+  
+      const SALT_ROUNDS = 10;
+      const hashedPassword = await bcrypt.hash(data.pass, SALT_ROUNDS);
 
       const user = await this.userModel.create({
-        name,
-        email,
-        pass,
-        company_id: company.id,
+        company: {
+          companyName: data.companyName,
+          tradingName: data.tradingName,
+          cnpj: data.cnpj
+        },
+        user: {
+          name: data.name,
+          email: data.email,
+          pass: hashedPassword,
+        }
       });
-
-      console.log('user', user);
-
-      res.status(201).json({ message: 'User created successfully' });
+      
+      this.responseHandler.success(res, 201, user, 'Usário criado com sucesso')
     } catch (err) {
-      console.error('Error creating user:', err);
-      res.status(500).json({ message: 'Error creating user' });
+      errorHandler(err as Error, res)
     }
   }
 }
