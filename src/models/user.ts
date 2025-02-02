@@ -8,11 +8,30 @@ export class UserModel {
     this.prisma = new PrismaClient
   }
 
-  async create (userInfo: ICreateUser) {
-    const user = await this.prisma.users.create({
-      data: userInfo,
-    })
+  async create ({company, user}: ICreateUser) {
+    return await this.prisma.$transaction(async (transaction) => {
+      const companyResult = await transaction.companies.create({
+        data: {
+          name: company.companyName,
+          tradingName: company.tradingName,
+          cnpj: company.cnpj,
+        }
+      })
 
-    return user;
+      return await transaction.users.create({
+        data: {
+          ...user,
+          companyId: companyResult.id,
+        },
+      })
+    })
+  }
+
+  async findAll ({email}: {email?: string}) {
+    return await this.prisma.users.findMany({
+      where: {
+        ...(email && {email}),
+      },
+    })
   }
 }
