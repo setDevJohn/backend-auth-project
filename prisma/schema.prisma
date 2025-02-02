@@ -8,15 +8,15 @@ datasource db {
 }
 
 model companies {
-  id           Int       @id @default(autoincrement())
-  name         String?   @db.VarChar(255)
-  trading_name String?   @db.VarChar(100)
-  cnpj         String    @unique(map: "cnpj") @db.VarChar(18)
-  active       Boolean?  @default(false)
-  created_at   DateTime? @default(now()) @db.Timestamp(0)
-  updated_at   DateTime? @db.Timestamp(0)
-  deleted_at   DateTime? @db.Timestamp(0)
-  users        users[]
+  id          Int       @id @default(autoincrement())
+  name        String?   @db.VarChar(255)
+  tradingName String?   @map("trading_name") @db.VarChar(100)
+  cnpj        String    @unique(map: "cnpj") @db.VarChar(18)
+  active      Boolean?  @default(false)
+  created_at  DateTime? @default(now()) @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  deleted_at  DateTime? @db.Timestamp(0)
+  users       users[]
 }
 
 model users {
@@ -25,7 +25,7 @@ model users {
   email                String    @db.VarChar(100)
   pass                 String    @db.VarChar(255)
   active               Boolean?  @default(false)
-  company_id           Int
+  companyId            Int       @map("company_id")
   failed_attempts      Int?      @default(0)
   password_reset_token String?   @db.VarChar(255)
   role                 String?   @default("user") @db.VarChar(20)
@@ -34,7 +34,7 @@ model users {
   deleted_at           DateTime? @db.Timestamp(0)
   created_at           DateTime? @default(now()) @db.Timestamp(0)
   updated_at           DateTime? @db.Timestamp(0)
-  companies            companies @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_company")
+  companies            companies @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_company")
 
-  @@index([company_id], map: "fk_company")
+  @@index([companyId], map: "fk_company")
 }
