@@ -34,4 +34,41 @@ export class UserModel {
       },
     })
   }
+
+  //Trocar as atualizações por uma rota só 
+
+  async updateLockedTime (user_id: number, locked_until: Date) {
+    return await this.prisma.users.update({
+      where: {
+        id: user_id,
+      },
+      data: {
+        locked_until
+      },
+    })
+  }
+
+  async updateFailedAttempts (user_id: number) {
+    return await this.prisma.users.update({
+      where: {
+        id: user_id,
+      },
+      data: {
+        failed_attempts: {
+          increment: 1
+        },
+      },
+    })
+  }
+
+  async updateLastLogin (user_id: number) {
+    return await this.prisma.users.update({
+      where: {
+        id: user_id,
+      },
+      data: {
+        last_login: new Date(),
+      },
+    })
+  }
 }
