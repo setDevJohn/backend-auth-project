@@ -1,16 +1,21 @@
+import { companies } from './../../node_modules/.prisma/client/index.d';
 import bcrypt from 'bcrypt';
 import { Request, Response } from "express";
 import { AuthModel } from "../models/auth";
 import { errorHandler } from "../error/errorHandler";
 import { AppError, HttpStatus } from "../error/appError";
 import { ResponseHandler } from '../helpers/responseHandler';
+import { UserModel } from '../models/user';
+import { generateToken } from '../helpers/jwt';
 
 export class AuthController {
   private authModel: AuthModel;
+  private userModel: UserModel;
   private responseHandler: ResponseHandler;
 
   constructor() {
     this.authModel = new AuthModel();
+    this.userModel = new UserModel();
     this.responseHandler = new ResponseHandler();
   }
 
@@ -19,34 +24,56 @@ export class AuthController {
       const { login, pass } = req.body;
 
       const user = await this.authModel.login(login)
-      console.log(user)
+
       if (!user) {
         throw new AppError('Usuário ou senha inválidos', HttpStatus.UNAUTHORIZED);
       }
-      if (!user?.active) {
+      if (!user.active) {
         throw new AppError('Usuário inativo', HttpStatus.FORBIDDEN);
       }
-      if (!user?.companies.active) {
+      if (!user.companies.active) {
         throw new AppError('Empresa inativa', HttpStatus.FORBIDDEN);
       }
+      if (user.failed_attempts  && user.failed_attempts>= 10) {
+        throw new AppError('Conta bloqueada por excesso de tentativas, redefina sua senha' , HttpStatus.FORBIDDEN);
+      }
+      if (user.locked_until) {
+        const now = new Date();
+        const lockedUntil = new Date(user.locked_until);
+        
+        if (now < lockedUntil) {
+          const diffMs = lockedUntil.getTime() - now.getTime();
+          const diffMinutes = Math.ceil(diffMs / 60000);
+          
+          throw new AppError(
+            `Muitas tentativas de login realizadas. Tente novamente em ${diffMinutes} minuto(s).`,
+            HttpStatus.FORBIDDEN
+          );
+        }
+      }
+      
+      let lockTime = 0;
+      if (user.failed_attempts === 3) lockTime = 2; // 2 minutos
+      if (user.failed_attempts === 7) lockTime = 4; // 4 minutos
+    
+      if (lockTime) {
+        const lockUntil = new Date();
+        lockUntil.setMinutes(lockUntil.getMinutes() + lockTime);
+        await this.userModel.updateLockedTime(user.id, lockUntil);
+      }
 
-      // TODO: Verificar as tentativar erradas e fazer a iteraçãona váriável
-      // TODO: Alterar o tempo de login após o erro e mostar até quando vai ficar bloqueado
-      // TODO> Bloquear o login se o usuáio estiver com cbloqueio temporário
-      // TODO: Salvar a data e o tempo de login do usuário
       // TODO: Criar um token com o login e o tempo de expiração para autenticar o usuário na próxima requisição
       // TODO: Enviar um email para confirmação de senha com expiração
-      // TODO: Criar campo para token de confirmação de conta e campo para conta verificada 
-      // TODO: Veririficar se cumpriu os requisitos para oo login 
-      // TODO: Refatorar
-      console.log(pass)
       const passCompare = await bcrypt.compare(pass, user.pass)
 
       if (!passCompare) {
+        await this.userModel.updateFailedAttempts(user.id)
         throw new AppError('Usuário ou senha inválidos', HttpStatus.UNAUTHORIZED);
       }
 
-      this.responseHandler.success(res, 200, user, 'Autenticação bem sucedida')
+
+      const token = generateToken(String(user.id))
+      this.responseHandler.success(res, 200, token, 'Autenticação bem sucedida')
     } catch (err) {
       errorHandler(err as Error, res)
     }
