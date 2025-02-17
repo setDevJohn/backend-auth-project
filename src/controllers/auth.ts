@@ -1,11 +1,10 @@
-import { companies } from './../../node_modules/.prisma/client/index.d';
 import bcrypt from 'bcrypt';
 import { Request, Response } from "express";
 import { AuthModel } from "../models/auth";
+import { UserModel } from '../models/user';
 import { errorHandler } from "../error/errorHandler";
 import { AppError, HttpStatus } from "../error/appError";
 import { ResponseHandler } from '../helpers/responseHandler';
-import { UserModel } from '../models/user';
 import { generateToken } from '../helpers/jwt';
 
 export class AuthController {
@@ -62,7 +61,7 @@ export class AuthController {
         await this.userModel.updateLockedTime(user.id, lockUntil);
       }
 
-      // TODO: Criar um token com o login e o tempo de expiração para autenticar o usuário na próxima requisição
+      // TODO: Atualizar token com tempo de expiração para
       // TODO: Enviar um email para confirmação de senha com expiração
       const passCompare = await bcrypt.compare(pass, user.pass)
 
@@ -71,8 +70,7 @@ export class AuthController {
         throw new AppError('Usuário ou senha inválidos', HttpStatus.UNAUTHORIZED);
       }
 
-
-      const token = generateToken(String(user.id))
+      const token = generateToken(user)
       this.responseHandler.success(res, 200, token, 'Autenticação bem sucedida')
     } catch (err) {
       errorHandler(err as Error, res)
