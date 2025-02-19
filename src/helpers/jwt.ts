@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
 import { AppError, HttpStatus } from "../error/appError";
+import { ITokenData } from "../interfaces/token";
 
 const SECRET_KEY = process.env.JWT_SECRET || "seu_segredo_super_seguro";
 
-export function generateToken(user: any): string {
+export function generateToken(user: ITokenData): string {
    if (!SECRET_KEY) {
     throw new AppError(
       "JWT_SECRET environment variable not set.",

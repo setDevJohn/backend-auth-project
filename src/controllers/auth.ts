@@ -70,7 +70,16 @@ export class AuthController {
         throw new AppError('Usuário ou senha inválidos', HttpStatus.UNAUTHORIZED);
       }
 
-      const token = generateToken(user)
+      const tokenData = {
+        companyId: user.companyId,
+        userId: user.id,
+        role: user.role,
+        verified: user.verified ?? false
+      }
+
+      const token = generateToken(tokenData)
+      // Remover bloqueios
+      // gravar horarip de login
       this.responseHandler.success(res, 200, token, 'Autenticação bem sucedida')
     } catch (err) {
       errorHandler(err as Error, res)
