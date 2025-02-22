@@ -58,7 +58,7 @@ export class AuthController {
       if (lockTime) {
         const lockUntil = new Date();
         lockUntil.setMinutes(lockUntil.getMinutes() + lockTime);
-        await this.userModel.updateLockedTime(user.id, lockUntil);
+        await this.userModel.update(user.id, {locked_until: lockUntil});
       }
 
       // TODO: Atualizar token com tempo de expiração para
@@ -66,9 +66,15 @@ export class AuthController {
       const passCompare = await bcrypt.compare(pass, user.pass)
 
       if (!passCompare) {
-        await this.userModel.updateFailedAttempts(user.id)
+        await this.userModel.update(user.id, { failed_attempts: { increment: 1 }})
         throw new AppError('Usuário ou senha inválidos', HttpStatus.UNAUTHORIZED);
       }
+
+      await this.userModel.update(user.id, {
+        failed_attempts: 0,
+        locked_until: null,
+        last_login: new Date()
+      });
 
       const tokenData = {
         companyId: user.companyId,
@@ -76,10 +82,7 @@ export class AuthController {
         role: user.role,
         verified: user.verified ?? false
       }
-
       const token = generateToken(tokenData)
-      // Remover bloqueios
-      // gravar horarip de login
       this.responseHandler.success(res, 200, token, 'Autenticação bem sucedida')
     } catch (err) {
       errorHandler(err as Error, res)
