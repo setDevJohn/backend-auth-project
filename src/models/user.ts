@@ -27,11 +27,26 @@ export class UserModel {
     })
   }
 
-  async findAll ({email}: {email?: string}) {
+  async findAll ({id, email}: {id?: number, email?: string}) {
     return await this.prisma.users.findMany({
       where: {
+        ...(id && {id}),
         ...(email && {email}),
+        deleted_at: null,
       },
+      select: {
+        active: true,
+        companyId: true,
+        created_at: true,
+        email: true,
+        id: true,
+        name: true,
+        password_reset_token: true,
+        account_verification_token: true,
+        role: true,
+        updated_at: true,
+        verified: true,
+      }
     })
   }
 
