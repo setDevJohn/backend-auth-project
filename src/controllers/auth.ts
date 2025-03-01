@@ -80,7 +80,8 @@ export class AuthController {
         companyId: user.companyId,
         userId: user.id,
         role: user.role,
-        verified: user.verified ?? false
+        verified: user.verified ?? false,
+        email: user.email
       }
       const token = generateToken(tokenData)
       this.responseHandler.success(res, 200, token, 'Autenticação bem sucedida')
