@@ -7,9 +7,13 @@ export interface ICreateUserResquest {
   cnpj: string,
 }
 export interface IUpdateUserRequest {
-  locked_until?: Date | null
+  verified?: boolean
+  pass?: string
   last_login?: Date
+  locked_until?: Date | null
   failed_attempts?: number | { increment: number }
+  password_reset_token?: string | null
+  account_verification_token?: string | null
 }
 
 export interface ICreateUser {
