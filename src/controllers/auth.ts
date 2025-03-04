@@ -61,8 +61,7 @@ export class AuthController {
         await this.userModel.update(user.id, {locked_until: lockUntil});
       }
 
-      // TODO: Atualizar token com tempo de expiração para
-      // TODO: Enviar um email para confirmação de senha com expiração
+      // TODO: Atualizar token com tempo de expiração para testar no front o redirecionamento
       const passCompare = await bcrypt.compare(pass, user.pass)
 
       if (!passCompare) {
@@ -73,7 +72,8 @@ export class AuthController {
       await this.userModel.update(user.id, {
         failed_attempts: 0,
         locked_until: null,
-        last_login: new Date()
+        last_login: new Date(),
+        password_reset_token: null,
       });
 
       const tokenData = {
