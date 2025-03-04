@@ -41,7 +41,7 @@ export class UserController {
       await this.userModel.update(user.id, { account_verification_token: confirmToken})
 
       const subject = 'Confirmação de conta';
-      const content = `Utilize o código de confirmação para ativar sua conta`
+      const content = `Utilize o código de confirmação para ativar sua conta \n ${confirmToken}`
 
       await sendEmail(data.email, subject, content)
       
@@ -74,7 +74,7 @@ export class UserController {
       await this.userModel.update(user.id, { password_reset_token: resetToken})
 
       const subject = 'Redefinição de senha';
-      const content = `Utilize o código de recuperação para redefinir sua senha`
+      const content = `Utilize o código de recuperação para redefinir sua senha \n ${resetToken}>`
 
       await sendEmail(email, subject, content)
 
@@ -163,7 +163,7 @@ export class UserController {
       await this.userModel.update(user.id, { account_verification_token: confirmToken})
 
       const subject = 'Confirmação de conta';
-      const content = `Utilize o código de confirmação para ativar sua conta`
+      const content = `Utilize o código de confirmação para ativar sua conta \n ${confirmToken}`
 
       await sendEmail(email, subject, content)
 
