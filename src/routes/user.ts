@@ -1,3 +1,4 @@
+import { authMiddleware } from '../helpers/authMiddleware';
 import { UserMiddleware } from '../middlewares/user';
 import { UserController } from './../controllers/user';
 import { Router } from 'express';
@@ -22,6 +23,7 @@ userRouter.post('/sendResetToken',
 )
 
 userRouter.post('/sendConfirmToken',
+  authMiddleware,
   userMiddleware.validateEmail,
   (req, res) => userController.sendConfirmToken(req, res)
 )
@@ -33,6 +35,7 @@ userRouter.post('/confirmToken',
 )
 
 userRouter.post('/confirmAccount', 
+  authMiddleware,
   userMiddleware.validateToken,
   userMiddleware.confirmAccount,
   (req, res) => userController.confirmAccount(req, res)
