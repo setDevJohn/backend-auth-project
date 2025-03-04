@@ -1,4 +1,4 @@
-export function generateRandonToken (length: number = 8) {
+export function generateRandonToken (length: number = 6) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let token = '';
   
