@@ -74,7 +74,7 @@ export class UserController {
       await this.userModel.update(user.id, { password_reset_token: resetToken})
 
       const subject = 'Redefinição de senha';
-      const content = `Utilize o código de recuperação para redefinir sua senha \n ${resetToken}>`
+      const content = `Utilize o código de recuperação para redefinir sua senha \n ${resetToken}`
 
       await sendEmail(email, subject, content)
 
