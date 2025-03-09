@@ -116,7 +116,7 @@ export class UserMiddleware {
         throw new AppError('Token é obrigatório', HttpStatus.BAD_REQUEST) 
       }
 
-      if (String(token).length !== 11) {
+      if (String(token).length !== 6) {
         throw new AppError('Formato de token inválido', HttpStatus.BAD_REQUEST)
       }
 
