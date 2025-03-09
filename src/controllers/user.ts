@@ -41,9 +41,8 @@ export class UserController {
       await this.userModel.update(user.id, { account_verification_token: confirmToken})
 
       const subject = 'Confirmação de conta';
-      const content = `Utilize o código de confirmação para ativar sua conta \n ${confirmToken}`
-
-      await sendEmail(data.email, subject, content)
+      const fileName = 'confirmAccount'
+      await sendEmail(data.email, subject, confirmToken, fileName)
       
       this.responseHandler.success(res, 201, user, 'Usário criado com sucesso')
     } catch (err) {
@@ -74,9 +73,8 @@ export class UserController {
       await this.userModel.update(user.id, { password_reset_token: resetToken})
 
       const subject = 'Redefinição de senha';
-      const content = `Utilize o código de recuperação para redefinir sua senha \n ${resetToken}`
-
-      await sendEmail(email, subject, content)
+      const fileName = 'resetPassword';
+      await sendEmail(email, subject, resetToken, fileName)
 
       this.responseHandler.success(res, 201, user, 'Token enviado com sucesso')
     } catch (err) {
@@ -163,9 +161,8 @@ export class UserController {
       await this.userModel.update(user.id, { account_verification_token: confirmToken})
 
       const subject = 'Confirmação de conta';
-      const content = `Utilize o código de confirmação para ativar sua conta \n ${confirmToken}`
-
-      await sendEmail(email, subject, content)
+      const fileName = 'confirmAccount'
+      await sendEmail(email, subject, confirmToken, fileName)
 
       this.responseHandler.success(res, 201, user, 'Token enviado com sucesso')
     } catch (err) {
