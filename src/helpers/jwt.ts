@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { AppError, HttpStatus } from "../error/appError";
 import { ITokenData } from "../interfaces/token";
 
-const SECRET_KEY = process.env.JWT_SECRET || "seu_segredo_super_seguro";
+const SECRET_KEY = process.env.SECRET_KEY;
 
 export function generateToken(user: ITokenData): string {
    if (!SECRET_KEY) {
